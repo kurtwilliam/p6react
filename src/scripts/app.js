@@ -8,25 +8,31 @@ const app_key = "8ff409b8e0d5a7ff34466546fe3d19f8";
 // const apiKey = "lmaYqqmX9hmshjss7LPRrHpkU3W6p1HAl7AjsnAILtU4QG0HMz"; - MASHAPE
 
 let offsetRando = Math.floor(Math.random()*5543);
+let wordApp = {};
+const easyLen = ">2,<7";
+const medLen = ">3,<7";
+const hardLen = ">3,<9";
 
 class App extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			words: []
+			words: [],
+			userInput: "",
+			answerKeys: [],
+			wordStr: '',
+			points: 0
 		}
 		this.randoArrayPull = this.randoArrayPull.bind(this);
-		this.userInputVerification = this.userInputVerification.bind(this);
-		// console.log(this.words)
-
+		this.handleChange = this.handleChange.bind(this);
+		this.inputVer = this.inputVer.bind(this);
+		this.points = this.points.bind(this);
 	}
 	randoArrayPull(i) {
 		// Generate a random number of array length to sub in as an array index value 
 		let arrayNum = Math.floor(Math.random()*5000);
 
-
 		let wordsArray = this.state.words;
-		console.log(wordsArray);
 
 		let filteredWords = wordsArray.filter((word) => {
 			return word.word.match(/\'|\-|\ /ig) === null
@@ -36,14 +42,14 @@ class App extends React.Component {
 		function shuffle(array) {
 		  var currentIndex = array.length, temporaryValue, randomIndex;
 
-		  // While there remain elements to shuffle...
+		  // While there remain elements to shuffle
 		  while (0 !== currentIndex) {
 
-		    // Pick a remaining element...
+		    // Pick a remaining element
 		    randomIndex = Math.floor(Math.random() * currentIndex);
 		    currentIndex -= 1;
 
-		    // And swap it with the current element.
+		    // And swap it with the current element
 		    temporaryValue = array[currentIndex];
 		    array[currentIndex] = array[randomIndex];
 		    array[randomIndex] = temporaryValue;
@@ -54,72 +60,149 @@ class App extends React.Component {
 		// Shuffle filteredWords array
 		filteredWords = shuffle(filteredWords);
 
+		// console.log(filteredWords);
+
 		// Select the first 30 results and store them in another array, the answerKey
-		let answerKey = filteredWords.slice(0, 20);
+		// Use this to later verify if a user inputted a real result
 
+		const easyAmnt = 15;
+		const medAmnt = 20;
+		const hardAmnt = 25;
 
+		let answerKey = filteredWords.slice(0, easyAmnt);
 
-		console.log(answerKeyReduce);
+		wordApp.answerKey = [];
 
-		// var sum = [1, 2, 3].reduce(
-		//   function(total, num){ return total + num }
-		//   , 0);
+		for ( i = 0; i < answerKey.length; i++ ) {
+			wordApp.answerKey.push(answerKey[i].word)
+		}
 
+		// Make a string we can combine all of the words in!
+		let wordStr = ``;
 
-		// var a = "I want apple";
-		// var b = "an";
-		// var position = 6;
-		// var output = [a.slice(0, position), b, a.slice(position)].join('');
-		// console.log(output);
-		// for (i = 0; i < answerKey.length; i++) {
-		// 	let wordStr = `${answerKey[0].word}`;
-		// 	let wordStrLen = wordStr.length;
-		// 	if (i > 4){
-		// 		// Create random values to sub in for index values
-		// 		let randomOffset = [-1, -2, -3, -4];
-		// 		let randomOffsetValue = Math.floor(Math.random()*4);
-
-		// 	   let insertWord = answerKey[i].word;
-		// 	   // let outerWord = answerKey[i + randomOffset[randomOffsetValue]].word;
-		// 	   let position = Math.floor(Math.random()*wordStrLen);
-		// 	   let fullWord = [wordStr.slice(0, position), insertWord, wordStr.slice(position)].join('');
-		// 		console.log(fullWord);
-		// 	}
-		// 	console.log(wordStr);
-		// 	// let outerWord = answerKey[i];
-		// 	// let innerWord = answerKey[i + 1];
-		// 	// let position = Math.floor(Math.random()*answerKey.length);
-		// 	// console.log(position);
-		// 	// console.log(innerWord);
-		// 	// console.log(outerWord);
-		// }
-
-		// Save new words into an array (answer key) so we can later verify if a user inputted a real result - already from previous step
-
-		// Insert one result from array into another result from the array... aka cut up a word and insert a new word
-
-		// reduce - two words at a time, take the one word, split it somewhere, then return that, then split somewhere and return 
+		// Iterate through each word in the answer key and insert it into wordStr 
+		for (i = 0; i < wordApp.answerKey.length; i++) {
+			// redefine wordStr's length each iteration to randomly insert a word
+			let wordStrLen = wordStr.length;
+			// set a var = each word
+		   let word = wordApp.answerKey[i];
+		   // generate a random position to insert the word into the full wordStr
+		   let position = Math.floor(Math.random()*wordStrLen);
+		   // Cut up wordStr in a random place, insert this iteration of the word at a random position, then put wordStr back together
+		   let fullWord = [wordStr.slice(0, position), word, wordStr.slice(position)].join('');
+			// set value of wordStr to newly generated string fullWord
+			wordStr = fullWord;
+			console.log(wordStr)
+		}
+		console.log(wordApp.answerKey);
+		this.setState({
+			answerKeys: wordApp.answerKey,
+			wordStr
+		})
+		this.points();
 	}
-	userInputVerification(){
+	points(){
+		// Create a points system that goes down by 1 point every second. 
+		let points = 0;
+
+		let countdown = window.setInterval(() => {
+			// Update the h4 text with the number of seconds
+		  
+			// Decrement the number of seconds left
+			points = points -1;
+
+			// stop the points from decreasing at -30 points
+			if(points <= -30) {
+				window.clearInterval(countdown);
+			}
+			this.setState({
+				points: points
+			})
+
+		},2000);
+		console.log(points);
+	}
+	handleChange(e){
+		e.preventDefault();
+
+		this.setState({
+			userInput: e.target.value,
+		})
+	}
+	inputVer(e){
 		// Make function that on submission of a user input, verifies if the value inputted matches the value of a value in the answerKey array. 
-		// If it does, add +1 to score, and delete the value from the array.
+		// If it does, make it evaluate the wordStr to find a matching string.
+		// If it does, add +1 to score, delete the value from the key, and from the string displayed on the page.
 		// Else, -1 from the score
 
-		// for (var i = 0; i < myArray.length; i++) {
-		//     if (agent == myArray[i])
-		//         return true;
-		// }
-		// return false;
-	}
+		// Prevent browser refresh
+		e.preventDefault();
 
+		// Make clone of this.state.answerKeys
+		let inputState = Array.from(this.state.answerKeys);
+		// console.log(inputState);
+
+		// Get the user input
+		let indexKey = inputState.indexOf(this.state.userInput);
+		// console.log(indexKey);
+
+		// Get the state of wordStr
+		let wordPara = this.state.wordStr;
+
+		// Get the userInput
+		let inputUser = this.state.userInput;
+
+		// Get the current points
+		let newPoints = this.state.points;
+
+		// Search wordPara for userInput
+		const wordStrInput = wordPara.search(inputUser);
+		console.log(wordStrInput);
+
+		// if correct (can find it in the word paragraph and answerKey)
+		if ( indexKey >= 0 && wordStrInput >= 0 ) {
+			// Remove user input from Array 
+			inputState.splice(indexKey, 1);
+			// Remove user input from word paragraph 
+			let newWordPara = wordPara.replace(inputUser, '');
+			wordPara = newWordPara;
+			// Add 1 point to score
+			newPoints = newPoints + 5;
+
+			this.setState({
+				points: newPoints
+			})
+
+			console.log('bueno')
+		} else { 
+			// remove one point
+			newPoints = newPoints - 5;
+			console.log(newPoints + 'points')
+
+			this.setState({
+				points: newPoints
+			})
+
+			console.log('no bueno');
+		}
+		console.log(inputState);
+		console.log(wordPara);
+
+		// Update the state of the answerKeys, reset input field, and update the word paragraph
+		this.setState({
+			answerKeys: inputState,
+			userInput: '',
+			wordStr: wordPara
+		});
+	}
 	render(){
 		return (
 			<div>
 				<Header />
-				<h4>Show me a word! AHH! {this.state.words}</h4>
+				<h4 className="points">Score: {this.state.points}</h4>
 				<button onClick={this.randoArrayPull}>Random Array</button>
-				<form onSubmit={this.randoArraySubmit}>
-					<input  />
+				<form onSubmit={this.inputVer}>
+					<input className="userInput" name="userInput" value={this.state.userInput} onChange={this.handleChange} />
 				</form>
 			</div>
 		)
@@ -139,7 +222,7 @@ class App extends React.Component {
 				},
 				params:{
 					offset: 0,
-					word_length: ">4,<10",
+					word_length: easyLen,
 					exact: false
 				}
 			}

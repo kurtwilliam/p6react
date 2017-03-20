@@ -4,9 +4,12 @@ export default class Header extends React.Component{
 	constructor(){
 		super();
 		// this.state = {
-			
+
 		// }
 	}
+	// componentDidMount(){
+	// 	this.points();
+	// }
 	render(){
 		return(
 			<div>
