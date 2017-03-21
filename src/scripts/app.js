@@ -2,16 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {ajax} from 'jquery';
 import Header from './components/Header.js';
+import Footer from './components/Footer.js';
 
 const app_id = "dba7c455";
 const app_key = "8ff409b8e0d5a7ff34466546fe3d19f8";
 // const apiKey = "lmaYqqmX9hmshjss7LPRrHpkU3W6p1HAl7AjsnAILtU4QG0HMz"; - MASHAPE
 
-let offsetRando = Math.floor(Math.random()*5543);
+let offsetRando = Math.floor(Math.random()*2195);
 let wordApp = {};
-const easyLen = ">2,<7";
-const medLen = ">3,<7";
-const hardLen = ">3,<9";
 
 class App extends React.Component {
 	constructor() {
@@ -21,15 +19,21 @@ class App extends React.Component {
 			userInput: "",
 			answerKeys: [],
 			wordStr: '',
-			points: 0
+			points: 30,
+			noWords: '10',
+			gameOver: ''
 		}
 		this.randoArrayPull = this.randoArrayPull.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 		this.inputVer = this.inputVer.bind(this);
 		this.points = this.points.bind(this);
+		this.gameOver = this.gameOver.bind(this);
 	}
 	randoArrayPull(i) {
-		// Generate a random number of array length to sub in as an array index value 
+		// Generate a random number of array length to sub in as an array index value
+		window.clearInterval(wordApp.countdown);
+		this.state.points = 30;
+
 		let arrayNum = Math.floor(Math.random()*5000);
 
 		let wordsArray = this.state.words;
@@ -60,16 +64,16 @@ class App extends React.Component {
 		// Shuffle filteredWords array
 		filteredWords = shuffle(filteredWords);
 
-		// console.log(filteredWords);
-
-		// Select the first 30 results and store them in another array, the answerKey
+		// Select the first few results based on the difficulty and store them in another array, the answerKey
 		// Use this to later verify if a user inputted a real result
 
-		const easyAmnt = 15;
-		const medAmnt = 20;
-		const hardAmnt = 25;
+		// const easyAmnt = 10;
+		// const medAmnt = 15;
+		// const hardAmnt = 20;
+	
+		// if ( radio id=small is checked ){ this.state.noWords = easyAmnt } else if ( radio id=regular is checked ){ this.state.noWords = medAmnt } else ( radio id=large is checked ){ this.state.noWords = hardAmnt }
 
-		let answerKey = filteredWords.slice(0, easyAmnt);
+		let answerKey = filteredWords.slice(0, 10);
 
 		wordApp.answerKey = [];
 
@@ -100,27 +104,27 @@ class App extends React.Component {
 			wordStr
 		})
 		this.points();
+		let quizButton = document.querySelector('.quizButton')
+		quizButton.classList.toggle('hidden');
 	}
 	points(){
 		// Create a points system that goes down by 1 point every second. 
-		let points = 0;
-
-		let countdown = window.setInterval(() => {
+		wordApp.countdown = window.setInterval(() => {
 			// Update the h4 text with the number of seconds
-		  
+		  	let points = this.state.points;
 			// Decrement the number of seconds left
+			// console.log("sdfsdfdsf", this.state.points);
 			points = points -1;
 
 			// stop the points from decreasing at -30 points
-			if(points <= -30) {
-				window.clearInterval(countdown);
+			if(points <= 0) {
+				window.clearInterval(wordApp.countdown);
+				this.gameOver();
 			}
 			this.setState({
 				points: points
-			})
-
-		},2000);
-		console.log(points);
+			}) 
+		},1000);
 	}
 	handleChange(e){
 		e.preventDefault();
@@ -128,6 +132,24 @@ class App extends React.Component {
 		this.setState({
 			userInput: e.target.value,
 		})
+	}
+	gameOver(){
+		if ( this.state.points <= 0 ){
+			this.setState({
+				gameOver: "You Win!",
+				wordStr: ''
+			})
+			let quizButton = document.querySelector('.quizButton')
+			quizButton.classList.toggle('hidden');
+		} else if ( this.state.wordStr === '' ) {
+			window.clearInterval(wordApp.countdown);
+			this.setState({
+				gameOver: "You Lose! HAHAHA",
+				wordStr: ''
+			})
+			let quizButton = document.querySelector('.quizButton')
+			quizButton.classList.toggle('hidden');
+		}
 	}
 	inputVer(e){
 		// Make function that on submission of a user input, verifies if the value inputted matches the value of a value in the answerKey array. 
@@ -138,27 +160,18 @@ class App extends React.Component {
 		// Prevent browser refresh
 		e.preventDefault();
 
-		// Make clone of this.state.answerKeys
+		// Make clone of answerKeys, userInput, wordStr, and points
 		let inputState = Array.from(this.state.answerKeys);
-		// console.log(inputState);
-
-		// Get the user input
-		let indexKey = inputState.indexOf(this.state.userInput);
-		// console.log(indexKey);
-
-		// Get the state of wordStr
-		let wordPara = this.state.wordStr;
-
-		// Get the userInput
 		let inputUser = this.state.userInput;
-
-		// Get the current points
+		let wordPara = this.state.wordStr;
 		let newPoints = this.state.points;
+
+		// Find the index of the answerKeys from the userInput if they match
+		let indexKey = inputState.indexOf(this.state.userInput);
 
 		// Search wordPara for userInput
 		const wordStrInput = wordPara.search(inputUser);
 		console.log(wordStrInput);
-
 		// if correct (can find it in the word paragraph and answerKey)
 		if ( indexKey >= 0 && wordStrInput >= 0 ) {
 			// Remove user input from Array 
@@ -167,26 +180,23 @@ class App extends React.Component {
 			let newWordPara = wordPara.replace(inputUser, '');
 			wordPara = newWordPara;
 			// Add 1 point to score
-			newPoints = newPoints + 5;
-
 			this.setState({
-				points: newPoints
+				points: newPoints + 5
 			})
 
 			console.log('bueno')
 		} else { 
-			// remove one point
-			newPoints = newPoints - 5;
-			console.log(newPoints + 'points')
-
+			// remove three points
 			this.setState({
-				points: newPoints
+				points: newPoints -1
 			})
 
 			console.log('no bueno');
 		}
-		console.log(inputState);
-		console.log(wordPara);
+
+		if ( wordPara === '' ){
+			this.gameOver();
+		}
 
 		// Update the state of the answerKeys, reset input field, and update the word paragraph
 		this.setState({
@@ -195,15 +205,28 @@ class App extends React.Component {
 			wordStr: wordPara
 		});
 	}
+
 	render(){
 		return (
-			<div>
+			<div className="enclosing">
 				<Header />
-				<h4 className="points">Score: {this.state.points}</h4>
-				<button onClick={this.randoArrayPull}>Random Array</button>
-				<form onSubmit={this.inputVer}>
-					<input className="userInput" name="userInput" value={this.state.userInput} onChange={this.handleChange} />
-				</form>
+				<div className="triangleLeft"></div>
+				<div className="triangleRight"></div>
+				<div className="wrapper">
+					<div className="main">
+						<h4 className="points">Score: {this.state.points}</h4>
+						<div>
+							<p>{this.state.wordStr}</p>
+						</div>
+						<h2>{this.state.gameOver}</h2>
+						<button className='quizButton' onClick={this.randoArrayPull}>Feed me!</button>
+						<form onSubmit={this.inputVer}>
+							<input className="userInput" name="userInput" value={this.state.userInput} onChange={this.handleChange} placeholder="type a word here!" />
+							<button type="submit">Answer!</button>
+						</form>
+					</div>
+				</div>
+				<Footer />
 			</div>
 		)
 	}
@@ -221,8 +244,8 @@ class App extends React.Component {
 					"app_key": app_key
 				},
 				params:{
-					offset: 0,
-					word_length: easyLen,
+					offset: offsetRando,
+					word_length: '>2,<6',
 					exact: false
 				}
 			}
