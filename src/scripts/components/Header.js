@@ -3,21 +3,27 @@ import React from 'react';
 export default class Header extends React.Component{
 	constructor(){
 		super();
-		// this.state = {
-		// 	wordLength: ''
-		// }
-		// this.wordLength = this.wordLength.bind(this);
-		// this.headerChange = this.headerChange.bind(this);
+		this.modal = this.modal.bind(this);
+		this.close = this.close.bind(this);
 	}
-	componentDidMount(){
-		// this.wordLength();
+	modal(){
+		// Get the modal, modalBtn, and closing span
+		let modal = document.getElementById('modal');
+		let btn = document.getElementById("modalBtn");
+
+		// When the user clicks on the button, open the modal 
+		btn.onclick = function() {
+		    modal.style.display = "block";
+		}
 	}
-	// wordLength(){
-	// 	// let length = document.querySelector('input[name = "length"]:checked').value;
-	// 	this.setState({
-	// 		wordLength: length
-	// 	})
-	// }
+	close(){
+		let span = document.getElementById("close");
+		let modal = document.getElementById('modal');
+		// When the user clicks on the close button, closes modal
+		span.onclick = function() {
+		    modal.style.display = "none";
+		}
+	}
 	headerChange(e){
 		this.setState({
 			wordLength: e.target.value,
@@ -28,33 +34,16 @@ export default class Header extends React.Component{
 		return(
 			<header>
 				<h1>Word Sandwiches</h1>
+				<button id="modalBtn" onClick={this.modal}>
+				<i className="fa fa-info-circle" aria-hidden="true"></i>
+				</button>
+				<div id="modal">
+					<div className="modalContent">
+						<span id="close" onClick={this.close}>&times;</span>
+						<p>Try to find all of the words! Words are 3-5 letters long and usually verbs. Each letter belongs to a word, and even if you guess a real word it might not be the right word. Good luck!</p>
+					</div>
+				</div>
 			</header>
 		)
 	}
 }
-
-				// <nav>
-				// 	<button>Settings</button>
-				// 	<div>
-				// 		<h3>Difficulty</h3>
-				// 		<div>
-				// 			<h4>Size of Sandwich (word length)</h4>
-				// 			<label htmlFor="easy">Lean Cuisine</label>
-				// 			<input type="radio" id="easy" name="length" onChange={this.headerChange} value=">2,<7" />
-				// 			<label htmlFor="medium">Normal</label>
-				// 			<input type="radio" id="medium" name="length" value=">3,<8" onChange={this.headerChange} />
-				// 			<label htmlFor="hard">Extra Protein</label>
-				// 			<input type="radio" id="hard" name="length" value=">4,<9" onChange={this.headerChange} />
-				// 		</div>
-				// 		<div>
-				// 			<h4>Number of Toppings (number of words)</h4>
-				// 			<label htmlFor="small">Just the meat please!</label>
-				// 			<input type="radio" id="small" name="numberOfWords" onChange={this.headerChange} checked/>
-				// 			<label htmlFor="regular">Regular</label>
-				// 			<input type="radio" id="regular" name="numberOfWords" onChange={this.headerChange} />
-				// 			<label htmlFor="large">I can't fit it in my mouth.</label>
-				// 			<input type="radio" id="large" name="numberOfWords" onChange={this.headerChange} />
-				// 		</div>
-						
-				// 	</div>
-				// </nav>

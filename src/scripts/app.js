@@ -30,11 +30,12 @@ class App extends React.Component {
 		this.gameOver = this.gameOver.bind(this);
 	}
 	randoArrayPull(i) {
-		// Generate a random number of array length to sub in as an array index value
-		window.clearInterval(wordApp.countdown);
-		this.state.points = 30;
-
-		let arrayNum = Math.floor(Math.random()*5000);
+		// Reset timer upon starting
+		// Clear content in main div 
+		this.setState({
+			points:30,
+			gameOver:''
+		}) 
 
 		let wordsArray = this.state.words;
 
@@ -67,12 +68,6 @@ class App extends React.Component {
 		// Select the first few results based on the difficulty and store them in another array, the answerKey
 		// Use this to later verify if a user inputted a real result
 
-		// const easyAmnt = 10;
-		// const medAmnt = 15;
-		// const hardAmnt = 20;
-	
-		// if ( radio id=small is checked ){ this.state.noWords = easyAmnt } else if ( radio id=regular is checked ){ this.state.noWords = medAmnt } else ( radio id=large is checked ){ this.state.noWords = hardAmnt }
-
 		let answerKey = filteredWords.slice(0, 10);
 
 		wordApp.answerKey = [];
@@ -96,16 +91,25 @@ class App extends React.Component {
 		   let fullWord = [wordStr.slice(0, position), word, wordStr.slice(position)].join('');
 			// set value of wordStr to newly generated string fullWord
 			wordStr = fullWord;
-			console.log(wordStr)
 		}
-		console.log(wordApp.answerKey);
+		// Update the states with the words we just generated
 		this.setState({
 			answerKeys: wordApp.answerKey,
 			wordStr
 		})
+		// Start the CLOCK! 
 		this.points();
-		let quizButton = document.querySelector('.quizButton')
-		quizButton.classList.toggle('hidden');
+
+		// Add the class of hidden to new quiz button so you can't generate a new puzzle. Sorry - I tried to store these in variables but for some reason it didn't work when I did
+		document.getElementById("quizButton").className += " hidden";
+
+		// hide inputs
+		document.getElementById("userInput").className =
+		   document.getElementById("userInput").className.replace
+		      ( /(?:^|\s)hidden(?!\S)/g , '' )
+		document.getElementById("userInputBtn").className =
+		   document.getElementById("userInputBtn").className.replace
+		      ( /(?:^|\s)hidden(?!\S)/g , '' )
 	}
 	points(){
 		// Create a points system that goes down by 1 point every second. 
@@ -113,7 +117,6 @@ class App extends React.Component {
 			// Update the h4 text with the number of seconds
 		  	let points = this.state.points;
 			// Decrement the number of seconds left
-			// console.log("sdfsdfdsf", this.state.points);
 			points = points -1;
 
 			// stop the points from decreasing at -30 points
@@ -134,22 +137,31 @@ class App extends React.Component {
 		})
 	}
 	gameOver(){
-		if ( this.state.points <= 0 ){
+		if ( this.state.points <= 1 ){
+			// Clear counter, set gameOver state to display message, reset wordStr
 			this.setState({
-				gameOver: "You Win!",
+				gameOver: `Aww dangit, you lose! Words you missed: ${this.state.answerKeys}`,
 				wordStr: ''
 			})
-			let quizButton = document.querySelector('.quizButton')
-			quizButton.classList.toggle('hidden');
-		} else if ( this.state.wordStr === '' ) {
+
+			// show new quiz button, hide inputs - sorry, I tried to clean these up by storing them in variables but it didn't work
+			document.getElementById("quizButton").className = document.getElementById("quizButton").className.replace( /(?:^|\s)hidden(?!\S)/g , '' );
+
+			document.getElementById("userInput").className += " hidden";
+			document.getElementById("userInputBtn").className += " hidden";
+		} else if ( this.state.wordStr.length <= 6 ) {
+			// Clear counter, set gameOver state to display message, reset wordStr
+			this.setState({
+				gameOver: `Congraulations, you win with a score of ${this.state.points+5}!`,
+				wordStr: ''
+			})
 			window.clearInterval(wordApp.countdown);
-			this.setState({
-				gameOver: "You Lose! HAHAHA",
-				wordStr: ''
-			})
-			let quizButton = document.querySelector('.quizButton')
-			quizButton.classList.toggle('hidden');
-		}
+			// show new quiz button, hide inputs
+			document.getElementById("quizButton").className = document.getElementById("quizButton").className.replace( /(?:^|\s)hidden(?!\S)/g , '' );
+
+			document.getElementById("userInput").className += " hidden";
+			document.getElementById("userInputBtn").className += " hidden";
+		} 
 	}
 	inputVer(e){
 		// Make function that on submission of a user input, verifies if the value inputted matches the value of a value in the answerKey array. 
@@ -171,7 +183,7 @@ class App extends React.Component {
 
 		// Search wordPara for userInput
 		const wordStrInput = wordPara.search(inputUser);
-		console.log(wordStrInput);
+
 		// if correct (can find it in the word paragraph and answerKey)
 		if ( indexKey >= 0 && wordStrInput >= 0 ) {
 			// Remove user input from Array 
@@ -183,46 +195,38 @@ class App extends React.Component {
 			this.setState({
 				points: newPoints + 5
 			})
-
-			console.log('bueno')
 		} else { 
-			// remove three points
+			// remove one point
 			this.setState({
 				points: newPoints -1
 			})
-
-			console.log('no bueno');
 		}
-
-		if ( wordPara === '' ){
-			this.gameOver();
-		}
-
 		// Update the state of the answerKeys, reset input field, and update the word paragraph
 		this.setState({
 			answerKeys: inputState,
 			userInput: '',
 			wordStr: wordPara
 		});
+		// If there is just one word left, upon submission run the gameOver function
+		if ( this.state.wordStr.length <= 6 ){
+			this.gameOver();
+		}
 	}
-
 	render(){
 		return (
 			<div className="enclosing">
 				<Header />
-				<div className="triangleLeft"></div>
-				<div className="triangleRight"></div>
 				<div className="wrapper">
 					<div className="main">
 						<h4 className="points">Score: {this.state.points}</h4>
-						<div>
-							<p>{this.state.wordStr}</p>
+						<div id="gameDiv">
+							<p id="gameDivP">{this.state.wordStr}</p>
+							<h2 id="gameDivH2">{this.state.gameOver}</h2>
 						</div>
-						<h2>{this.state.gameOver}</h2>
-						<button className='quizButton' onClick={this.randoArrayPull}>Feed me!</button>
+						<button className='quizButton' id="quizButton" onClick={this.randoArrayPull}>Feed me!</button>
 						<form onSubmit={this.inputVer}>
-							<input className="userInput" name="userInput" value={this.state.userInput} onChange={this.handleChange} placeholder="type a word here!" />
-							<button type="submit">Answer!</button>
+							<input id='userInput' className="userInput hidden" name="userInput" value={this.state.userInput} onChange={this.handleChange} placeholder="type a word here!" autoCorrect="off" autoComplete="off" autoCapitalize="none" />
+							<button id='userInputBtn' className="hidden" type="submit">Answer!</button>
 						</form>
 					</div>
 				</div>
@@ -245,7 +249,7 @@ class App extends React.Component {
 				},
 				params:{
 					offset: offsetRando,
-					word_length: '>2,<6',
+					word_length: '>2,<5',
 					exact: false
 				}
 			}
@@ -253,8 +257,6 @@ class App extends React.Component {
 				this.setState({
 					words: data.results
 				});
-				// this.state.words.push(data.results);
-			console.log(data.results);
 		});
 	}
 }
