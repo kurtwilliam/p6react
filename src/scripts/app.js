@@ -138,9 +138,16 @@ class App extends React.Component {
 	}
 	gameOver(){
 		if ( this.state.points <= 1 ){
+			// Add a space for each element left in the answer key by mapping array
+			let answers = this.state.answerKeys;
+
+			function addSpace(answer){
+				return (' ' + answer);
+			}
+
 			// Clear counter, set gameOver state to display message, reset wordStr
 			this.setState({
-				gameOver: `Aww dangit, you lose! Words you missed: ${this.state.answerKeys}`,
+				gameOver: `Aww dangit, you lose! Words you missed: ${answers.map(addSpace)}`,
 				wordStr: ''
 			})
 
@@ -217,6 +224,8 @@ class App extends React.Component {
 			<div className="enclosing">
 				<Header />
 				<div className="wrapper">
+				<div className="triangleLeft"></div>
+				<div className="triangleRight"></div>
 					<div className="main">
 						<h4 className="points">Score: {this.state.points}</h4>
 						<div id="gameDiv">
