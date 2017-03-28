@@ -40,7 +40,7 @@ class App extends React.Component {
 		let wordsArray = this.state.words;
 
 		let filteredWords = wordsArray.filter((word) => {
-			return word.word.match(/\'|\-|\ /ig) === null
+			return word.word.match(/\'|\-|\´/ig) === null
 		})
 		
 		// Create shuffle filtered words function using Fisher-Yates Shuffle
@@ -202,6 +202,7 @@ class App extends React.Component {
 			this.setState({
 				points: newPoints + 5
 			})
+
 		} else { 
 			// remove one point
 			this.setState({

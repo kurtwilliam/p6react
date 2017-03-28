@@ -179,6 +179,7 @@ h4 {
 	@media (max-width: 400px){
 		padding:10px;
 	}
+
 	div {
 		min-width:500px;
 		width:100%;
@@ -239,6 +240,9 @@ h4 {
 		@media (max-width:500px){
 			padding-bottom: 10px;
 		}
+	}
+	#gameDivP{
+		word-break:break-word;
 	}
 }
 
