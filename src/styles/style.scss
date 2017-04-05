@@ -27,6 +27,9 @@ body{
 	height:100vh;
 	position: relative;
 	min-height:600px;
+	@media (max-width: 850px){
+		overflow: hidden;
+	}
 }
 
 .triangleLeft{
@@ -242,7 +245,8 @@ h4 {
 		}
 	}
 	#gameDivP{
-		word-break:break-word;
+		word-break:break-all;
+
 	}
 }
 

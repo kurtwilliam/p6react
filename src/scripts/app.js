@@ -32,12 +32,14 @@ class App extends React.Component {
 	randoArrayPull(i) {
 		// Reset timer upon starting
 		// Clear content in main div 
+		let wordsArray = this.state.words;
+
+		if ( wordsArray.length > 0 ) {
+			
 		this.setState({
 			points:30,
 			gameOver:''
 		}) 
-
-		let wordsArray = this.state.words;
 
 		let filteredWords = wordsArray.filter((word) => {
 			return word.word.match(/\'|\-|\´/ig) === null
@@ -110,6 +112,10 @@ class App extends React.Component {
 		document.getElementById("userInputBtn").className =
 		   document.getElementById("userInputBtn").className.replace
 		      ( /(?:^|\s)hidden(?!\S)/g , '' )
+
+      } else {
+      	return;
+		}
 	}
 	points(){
 		// Create a points system that goes down by 1 point every second. 
