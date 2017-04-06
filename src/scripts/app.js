@@ -4,14 +4,15 @@ import {ajax} from 'jquery';
 import Header from './components/Header.js';
 import Footer from './components/Footer.js';
 
+// Declare API information
 const app_id = "dba7c455";
 const app_key = "8ff409b8e0d5a7ff34466546fe3d19f8";
-// const apiKey = "lmaYqqmX9hmshjss7LPRrHpkU3W6p1HAl7AjsnAILtU4QG0HMz"; - MASHAPE
 
 let offsetRando = Math.floor(Math.random()*2195);
 let wordApp = {};
 
 class App extends React.Component {
+	// Set and bind states 
 	constructor() {
 		super();
 		this.state = {
@@ -29,91 +30,97 @@ class App extends React.Component {
 		this.points = this.points.bind(this);
 		this.gameOver = this.gameOver.bind(this);
 	}
+	// Run this function when submitting user input
 	randoArrayPull(i) {
-		// Reset timer upon starting
-		// Clear content in main div 
 		let wordsArray = this.state.words;
 
+		//Only run function if the Ajax request has populated a list
 		if ( wordsArray.length > 0 ) {
 			
-		this.setState({
-			points:30,
-			gameOver:''
-		}) 
+			// Reset timer upon starting
+			// Clear content in main div 
+			this.setState({
+				points:30,
+				gameOver:''
+			}) 
 
-		let filteredWords = wordsArray.filter((word) => {
-			return word.word.match(/\'|\-|\´/ig) === null
-		})
-		
-		// Create shuffle filtered words function using Fisher-Yates Shuffle
-		function shuffle(array) {
-		  var currentIndex = array.length, temporaryValue, randomIndex;
+			// Filter array for any non alphabet characters
+			let filteredWords = wordsArray.filter((word) => {
+				return word.word.match(/\'|\-|\´/ig) === null
+			})
+			
+			// Create shuffling function
+			function shuffle(array) {
+			  var currentIndex = array.length, temporaryValue, randomIndex;
 
-		  // While there remain elements to shuffle
-		  while (0 !== currentIndex) {
+			  // While there remain elements to shuffle
+			  while (0 !== currentIndex) {
 
-		    // Pick a remaining element
-		    randomIndex = Math.floor(Math.random() * currentIndex);
-		    currentIndex -= 1;
+			    // Pick a remaining element
+			    randomIndex = Math.floor(Math.random() * currentIndex);
+			    currentIndex -= 1;
 
-		    // And swap it with the current element
-		    temporaryValue = array[currentIndex];
-		    array[currentIndex] = array[randomIndex];
-		    array[randomIndex] = temporaryValue;
-		  }
-		  return array;
-		}
+			    // And swap it with the current element
+			    temporaryValue = array[currentIndex];
+			    array[currentIndex] = array[randomIndex];
+			    array[randomIndex] = temporaryValue;
+			  }
+			  return array;
+			}
 
-		// Shuffle filteredWords array
-		filteredWords = shuffle(filteredWords);
+			// Shuffle filteredWords array
+			filteredWords = shuffle(filteredWords);
 
-		// Select the first few results based on the difficulty and store them in another array, the answerKey
-		// Use this to later verify if a user inputted a real result
+			// Select the first few results based on the difficulty and store them in another array, the answerKey
+			// Use this to later verify if a user inputted a real result
 
-		let answerKey = filteredWords.slice(0, 10);
+			let answerKey = filteredWords.slice(0, 10);
 
-		wordApp.answerKey = [];
+			// Empty answerKey
+			wordApp.answerKey = [];
 
-		for ( i = 0; i < answerKey.length; i++ ) {
-			wordApp.answerKey.push(answerKey[i].word)
-		}
+			// Put each word in the answer key
+			for ( i = 0; i < answerKey.length; i++ ) {
+				wordApp.answerKey.push(answerKey[i].word)
+			}
 
-		// Make a string we can combine all of the words in!
-		let wordStr = ``;
+			// Make a string we can combine all of the words in!
+			let wordStr = ``;
 
-		// Iterate through each word in the answer key and insert it into wordStr 
-		for (i = 0; i < wordApp.answerKey.length; i++) {
-			// redefine wordStr's length each iteration to randomly insert a word
-			let wordStrLen = wordStr.length;
-			// set a var = each word
-		   let word = wordApp.answerKey[i];
-		   // generate a random position to insert the word into the full wordStr
-		   let position = Math.floor(Math.random()*wordStrLen);
-		   // Cut up wordStr in a random place, insert this iteration of the word at a random position, then put wordStr back together
-		   let fullWord = [wordStr.slice(0, position), word, wordStr.slice(position)].join('');
-			// set value of wordStr to newly generated string fullWord
-			wordStr = fullWord;
-		}
-		// Update the states with the words we just generated
-		this.setState({
-			answerKeys: wordApp.answerKey,
-			wordStr
-		})
-		// Start the CLOCK! 
-		this.points();
+			// Iterate through each word in the answer key and insert it into wordStr 
+			for (i = 0; i < wordApp.answerKey.length; i++) {
+				// redefine wordStr's length each iteration to randomly insert a word
+				let wordStrLen = wordStr.length;
+				// set a var = new word
+			   let word = wordApp.answerKey[i];
+			   // generate a random position to insert the word into the full wordStr
+			   let position = Math.floor(Math.random()*wordStrLen);
+			   // Cut up wordStr in a random place, insert this iteration of the word at a random position, then put wordStr back together
+			   let fullWord = [wordStr.slice(0, position), word, wordStr.slice(position)].join('');
+				// set value of wordStr to newly generated string fullWord
+				wordStr = fullWord;
+			}
+			// Update the states with the words we just generated
+			this.setState({
+				answerKeys: wordApp.answerKey,
+				wordStr
+			})
+			// Start the clock! 
+			this.points();
 
-		// Add the class of hidden to new quiz button so you can't generate a new puzzle. Sorry - I tried to store these in variables but for some reason it didn't work when I did
-		document.getElementById("quizButton").className += " hidden";
+			// Add the class of hidden to new quiz button so you can't generate a new puzzle. Sorry - I tried to store these in variables but for some reason it didn't work when I did
+			document.getElementById("quizButton").className += " hidden";
 
-		// hide inputs
-		document.getElementById("userInput").className =
-		   document.getElementById("userInput").className.replace
-		      ( /(?:^|\s)hidden(?!\S)/g , '' )
-		document.getElementById("userInputBtn").className =
-		   document.getElementById("userInputBtn").className.replace
-		      ( /(?:^|\s)hidden(?!\S)/g , '' )
+			// hide inputs
+			document.getElementById("userInput").className =
+			   document.getElementById("userInput").className.replace
+			      ( /(?:^|\s)hidden(?!\S)/g , '' )
+			document.getElementById("userInputBtn").className =
+			   document.getElementById("userInputBtn").className.replace
+			      ( /(?:^|\s)hidden(?!\S)/g , '' )
 
       } else {
+      	// If no Ajax call return function
       	return;
 		}
 	}
@@ -130,12 +137,14 @@ class App extends React.Component {
 				window.clearInterval(wordApp.countdown);
 				this.gameOver();
 			}
+			// Update state of points
 			this.setState({
 				points: points
 			}) 
 		},1000);
 	}
 	handleChange(e){
+		// Update user input when it is changed
 		e.preventDefault();
 
 		this.setState({
@@ -143,6 +152,8 @@ class App extends React.Component {
 		})
 	}
 	gameOver(){
+		// Make events for if the timer reaches 0 or if there are no more words
+		// So if the timer runs out...
 		if ( this.state.points <= 1 ){
 			// Add a space for each element left in the answer key by mapping array
 			let answers = this.state.answerKeys;
@@ -162,7 +173,9 @@ class App extends React.Component {
 
 			document.getElementById("userInput").className += " hidden";
 			document.getElementById("userInputBtn").className += " hidden";
-		} else if ( this.state.wordStr.length <= 6 ) {
+
+		// Else, if the user submits the form and there are no words left in the string
+		} else if ( this.state.wordStr.length <= 5 ) {
 			// Clear counter, set gameOver state to display message, reset wordStr
 			this.setState({
 				gameOver: `Congraulations, you win with a score of ${this.state.points+5}!`,
@@ -179,7 +192,7 @@ class App extends React.Component {
 	inputVer(e){
 		// Make function that on submission of a user input, verifies if the value inputted matches the value of a value in the answerKey array. 
 		// If it does, make it evaluate the wordStr to find a matching string.
-		// If it does, add +1 to score, delete the value from the key, and from the string displayed on the page.
+		// If it does, add +5 to score, delete the value from the key, and from the string displayed on the page.
 		// Else, -1 from the score
 
 		// Prevent browser refresh
@@ -197,14 +210,14 @@ class App extends React.Component {
 		// Search wordPara for userInput
 		const wordStrInput = wordPara.search(inputUser);
 
-		// if correct (can find it in the word paragraph and answerKey)
+		// if correct (can find it in the string and answerKey)
 		if ( indexKey >= 0 && wordStrInput >= 0 ) {
 			// Remove user input from Array 
 			inputState.splice(indexKey, 1);
 			// Remove user input from word paragraph 
 			let newWordPara = wordPara.replace(inputUser, '');
 			wordPara = newWordPara;
-			// Add 1 point to score
+			// Add 5 points to score
 			this.setState({
 				points: newPoints + 5
 			})
@@ -222,7 +235,7 @@ class App extends React.Component {
 			wordStr: wordPara
 		});
 		// If there is just one word left, upon submission run the gameOver function
-		if ( this.state.wordStr.length <= 6 ){
+		if ( this.state.wordStr.length <= 5 ){
 			this.gameOver();
 		}
 	}
@@ -251,6 +264,7 @@ class App extends React.Component {
 		)
 	}
 	componentDidMount(){
+		// Oxford Dictionary API call
 		ajax({
 			url: `http://proxy.hackeryou.com`,
 			type: 'GET',

@@ -18,11 +18,12 @@ html{
 	overflow-x:hidden;
 }
 
+// MAIN
+
 .enclosing{
 	display:flex;
 	flex-direction: column;
 	align-items: center;
-	// background: linear-gradient( to left top, navajowhite 0%, navajowhite 25%, darkgreen 25%, darkgreen 50%, orange 50%, orange 55%, indianred 55%, indianred 75%, navajowhite 75%, navajowhite 100%);/
 	height:100vh;
 	position: relative;
 	min-height:600px;
